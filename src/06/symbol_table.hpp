@@ -18,7 +18,8 @@ class SymbolTable {
     SymbolTable() {}
     void AddEntry(string s, int addr);
     bool Contains(string s);
-    int GetAddress(string s);
+    string GetAddress(string s);
+    string FormatAsBin(int address);
 };
 
 }
