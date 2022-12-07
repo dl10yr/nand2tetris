@@ -12,6 +12,7 @@ class CodeWriter {
   private:
     ofstream& out_;
     int labelnum_;
+    int start_;
 
     void PopD();
     void IncSP();
