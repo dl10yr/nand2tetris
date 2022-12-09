@@ -5,7 +5,7 @@
 #include <string>
 #include <assert.h>
 
-using namespace nand2tetris::vm_translator;
+using namespace nand2tetris::vm_translator2;
 using namespace std;
 
 CodeWriter::CodeWriter() {
