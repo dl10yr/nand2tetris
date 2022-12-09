@@ -17,11 +17,10 @@ enum VMCommandType {
 class Parser {
   private:
     string filename_;
-    ifstream& in_;
     string current_command_;
 
   public:
-    Parser(ifstream& f): in_(f) {};
+    Parser(string file_name): {};
     ~Parser();
     bool HasMoreCommands();
     void Advance();

@@ -18,16 +18,20 @@ int main(int argc, char** argv) {
     file_name = argv[1];
   }
 
-  ifstream file(file_name.c_str());
-  if (!file) {
-    cout << "cant find this file\n";
-    return 1;
+  int dot = filename.find();
+  file_name = file_name.substr(0, dot);
+  Parser parser(file_name);
+  CodeWriter writer;
+  writer.SetFileName(file_name);
+
+  while(parser.HasMoreCommands()) {
+    parser.Advance();
+    if (parser.CommandType() == C_ARITHMETIC) {
+      writer.WriteArithmetic(parser.Arg1());
+    } else if (parser.CommandType() == C_POP) {
+      writer.WritePushPop(C_POP, parser.Arg1(), parser.Arg2());
+    } else if (parser.CommandType() == C_PUSH) {
+      writer.WritePushPop(C_PUSH, parser.Arg1(), parser.Arg2());
+    }
   }
-
-  Parser parser(file);
-
-  ofstream output_file("main.asm");
-  CodeWriter code_writer(output_file);
-
-  
 }

@@ -198,7 +198,7 @@ void CodeWriter::WriteArithmetic(string command) {
   }
 }
 
-void CodeWriter::WritePushPop(CommandType command, string segment, int index) {
+void CodeWriter::WritePushPop(VMCommandType command, string segment, int index) {
   if (command == C_PUSH) {
     if (segment == "constant") {
       out_ << "@" << index << endl
