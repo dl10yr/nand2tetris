@@ -23,7 +23,7 @@ class CodeWriter {
     CodeWriter(): {};
     void SetFileName(string filename);
     void WriteArithmetic(string command);
-    void WritePushPop(CommandType command, string segment, int index);
+    void WritePushPop(VMCommandType command, string segment, int index);
     void Close();
 };
 
