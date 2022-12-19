@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
     file_name = argv[1];
   }
 
-  int dot = filename.find();
+  int dot = filename.find(".", 0);
   file_name = file_name.substr(0, dot);
   Parser parser(file_name);
   CodeWriter writer;
@@ -32,6 +32,18 @@ int main(int argc, char** argv) {
       writer.WritePushPop(C_POP, parser.Arg1(), parser.Arg2());
     } else if (parser.CommandType() == C_PUSH) {
       writer.WritePushPop(C_PUSH, parser.Arg1(), parser.Arg2());
-    }
+    } else if (parser.CommandType() == C_LABEL) {
+      writer.WriteLabel(parser.Arg1());
+    } else if (parser.CommandType() == C_GOTO) {
+      writer.WriteGoTo(parser.Arg1());
+    } else if (parser.CommandType() == C_IF) {
+      writer.WriteIf(parser.Arg1());
+    } else if (parser.CommandType() == C_FUNCTION) {
+      writer.WriteFunction(parser.Arg1(), parser.Arg2());
+    } else if (parser.CommandType() == C_RETURN) {
+      writer.WriteReturn();
+    } else if (parser.CommandType() == C_CALL) {
+      writer.WriteCall(parser.Arg1(), parser.Arg2());
+    } 
   }
 }
