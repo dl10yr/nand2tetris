@@ -54,8 +54,8 @@ void CodeWriter::SetReturn() {
     << "M=D" << endl;
 }
 
-void CodeWriter::GetReturn() {
-  out_ << "@R15" << endl
+void CodeWriter::GetReturn(int reg_num) {
+  out_ << "@R" << reg_num << endl
     << "A=M" << endl
     << "0;JMP" << endl;
 }
@@ -67,7 +67,7 @@ void CodeWriter::init() {
   DecSP();
   out_ << "M=-1" << endl;
   IncSP();
-  GetReturn();
+  GetReturn(15);
   out_ << "(START" << start_ << ")" << endl;
   start_++;
   
@@ -255,4 +255,172 @@ void CodeWriter::WritePushPop(VMCommandType command, string segment, int index) 
         << "M=D" << endl;
     }
   }
+}
+
+void CodeWriter::WriteInit() {
+  out_ << "@256" << endl
+    << "D=A" << endl
+    << "@SP" << endl
+    << "M=D" << endl;
+  out_ << "@START" << start_ << endl
+    << "0;JMP" << endl
+  out_ << "(MAKETRUE)" << endl;
+  DecSP();
+  out_ << "M=-1" << endl;
+  IncSP();
+  GetReturn(15);
+  out_ << "(START" << start_ << ")" << endl;
+  WriteCall("Sys.init", 0);
+  start_++;
+}
+
+void CodeWriter::WriteLabel(string label) {
+  out_ << "(" << function_name_ << "$" << label << ")" << endl;
+}
+
+void CodeWriter::WriteGoTo(string label) {
+  if (label != function_name_) {
+    out_ << "@" << function_name_ << "$" << label << endl;
+    out_ << "0;JMP" << endl;
+  } else {
+    out_ << "@" << label << endl;
+    out_ << "0;JMP" << endl;
+  }
+}
+
+void CodeWriter::WriteIf(string label) {
+  PopD();
+  out_ << "@" << function_name_ << "$" << label << endl;
+  out_ << "D;JNE" << endl;
+}
+
+void CodeWriter::WriteCall(string function_name, int num_of_args) {
+  // リターンアドレスをstackにpush
+  out_ << "@RETURN" << labelnum_ << endl
+    << "D=A" << endl
+    << "@SP" << endl
+    << "A=M" << endl
+    << "M=D" << endl;
+  IncSP();
+  // LCLをstackにpush
+  out_ << "@LCL" << endl
+    << "D=M" << endl
+    << "@SP" << endl
+    << "A=M" << endl
+    << "M=D" << endl;
+  IncSP();
+  // ARGをstackにpush
+  out_ << "@ARG" << endl
+    << "@SP" << endl
+    << "A=M" << endl
+    << "M=D" << endl;
+  IncSP();
+  // THISをstackにpush
+  out_ << "@THIS" << endl
+    << "@SP" << endl
+    << "A=M" << endl
+    << "M=D" << endl;
+  IncSP();
+  // THATをstackにpush
+  out_ << "@THAT" << endl
+    << "@SP" << endl
+    << "A=M" << endl
+    << "M=D" << endl;
+  IncSP();
+  // @ARGを修正
+  out_ << "@" << num_of_args << endl
+    << "D=A" << endl
+    << "@SP" << endl
+    << "D=M-D" << endl
+    << "@5" << endl
+    << "D=D-A" << endl
+    << "@ARG" << endl
+    << "M=D" << endl;
+  // @LCLを修正
+  out_ << "@SP" << endl
+    << "D=M" << endl
+    << "@LCL" << endl
+    << "M=D" < endl;
+  out_ << "@" << function_name << endl
+    << "0;JMP" << endl;
+  out_ << "(RETURN" << labelnum_ << ")" << endl;
+  labelnum_++;
+}
+
+void CodeWriter::WriteReturn() {
+  // FRAMEは一時変数
+  out_ << "@LCL" << endl
+    << "D=M" << endl
+    << "@FRAME" << endl
+    << "M=D" << endl;
+  // リターンアドレスの取得
+  out_ << "@5" << endl
+    << "D=A" << endl
+    << "@FRAME" << endl
+    << "A=M-D" << endl
+    << "D=M" << endl
+    << "@RET" << endl
+    << "M=D" << endl;
+  // Dレジスタに戻り値を保存し、@ARGにその値を入れる
+  // 関数のリターン時に@SPになるのは@ARG+1
+  PopD();
+  out_ << "@ARG" << endl
+    << "A=M" << endl
+    << "M=D" << endl;
+  // 呼び出し側のSPを戻す
+  out_ << "@ARG" << endl
+    << "D=M+1" << endl
+    << "@SP" << endl
+    << "M=D" << endl;
+  // thatを戻す
+  out_ << "@FRAME" << endl
+    << "A=M-1" << endl
+    << "D=M" << endl
+    << "@THAT" << endl
+    << "M=D" << endl;
+  // thisを戻す
+  out_ << "@2" << endl
+    << "D=A" << endl
+    << "@FRAME" << endl
+    << "A=M-D" << endl
+    << "D=M" << endl
+    << "@THIS" << endl
+    << "M=D" << endl;
+  // argを戻す
+  out_ << "@3" << endl
+    << "D=A" << endl
+    << "@FRAME" << endl
+    << "A=M-D" << endl
+    << "D=M" << endl
+    << "@ARG" << endl
+    << "M=D" << endl;
+  // lclを戻す
+  out_ << "@4" << endl
+    << "D=A" << endl
+    << "@FRAME" << endl
+    << "A=M-D" << endl
+    << "D=M" << endl
+    << "@LCL" << endl
+    << "M=D" << endl;
+  // リターンアドレスに移動
+  out_ << "@RET" << endl
+    << "A=M" << endl
+    << "0;JMP" << endl;
+}
+
+void CodeWriter::WriteFunction(string function_name, int num_of_locals) {
+  function_name_ = function_name;
+  // 関数の開始位置のためのラベルを宣言
+  out_ << "(" << function_name_ << ")" << endl;
+  for (int i = 0; i < num_of_locals; i++) {
+    WritePushPop(C_PUSH, "constant", 0);
+  }
+}
+
+void CodeWriter::SetOutputFileName(string outname) {
+  filename_ = outname;
+  string o = outname + ".asm";
+  out_.open(o.c_str());
+  WriteInit();
+  start_++;
 }

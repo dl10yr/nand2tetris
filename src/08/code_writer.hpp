@@ -10,14 +10,17 @@ namespace vm_translator2 {
 
 class CodeWriter {
   private:
-    ofstream& out_;
+    ofstream out_;
     int labelnum_;
     int start_;
+    string function_name_;
     string filename_;
+
 
     void PopD();
     void IncSP();
     void DecSP();
+    void GetReturn(int reg_num);
 
   public:
     CodeWriter(): {};
