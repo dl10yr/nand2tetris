@@ -15,6 +15,9 @@ enum JackKeyWord { CLASS, METHOD, FUNCTION, CONSTRUCTOR, INT, BOOLEAN, CHAR, VOI
 class JackTokenizer {
   private:
     ifstream in_;
+    string current_token_;
+
+    void Advance();
 
   public:
     JackTokenizer(string input_file): {};
@@ -27,6 +30,9 @@ class JackTokenizer {
     string Identifier();
     int IntVal();
     string StringVal();
+
+    string GetCurrentToken();
+    void UpdateCurrentToken();
 };
 
 }
