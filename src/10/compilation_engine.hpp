@@ -4,6 +4,7 @@
 #include "jack_tokenizer.hpp"
 #include <fstream>
 #include <iostream>
+using namespace nand2tetris::jack_tokenizer;
 
 namespace nand2tetris {
 namespace compilation_engine {
@@ -11,8 +12,9 @@ namespace compilation_engine {
 
 class CompilationEngine {
   private:
-    ifstream in_;
+    JackTokenizer * tokenizer_;
     ofstream out_;
+    void CompileTerm();
 
   public:
     CompilationEngine(string input_file, string output_file): {};
@@ -22,6 +24,7 @@ class CompilationEngine {
     void CompileClassVarDec();
     void CompileSubroutine();
     void CompileParameterList();
+    void CompileSubroutineBody();
     void CompileVarDec();
     void CompileStatements();
     void CompileDo();
@@ -30,6 +33,7 @@ class CompilationEngine {
     void CompileReturn();
     void CompileIf();
     void CompileExpression();
+    void CompileExpressionList();
 };
 
 }
